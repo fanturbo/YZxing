@@ -4,5 +4,5 @@
     <dimen name="scanner_view_corner_thick">4dp</dimen>
     <dimen name="scanner_view_focus_line_thick">1dp</dimen>
     <dimen name="scanner_view_tip_top">28dp</dimen>
-    <dimen name="scanner_view_tip_size">14sp</dimen>
+    <dimen name="scanner_view_tip_size">12sp</dimen>
 </resources>

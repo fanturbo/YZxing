@@ -141,6 +141,12 @@ public class ScannerView extends View {
         String tip = getResources().getString(R.string.scanner_view_tip_text);
         float l = (w - tip.length() * mTipPaint.getTextSize()) / 2;
         canvas.drawText(tip, l, h, mTipPaint);
+        Paint paint = new Paint();
+        paint.setTextAlign(Paint.Align.CENTER);
+        paint.setColor(getResources().getColor(R.color.scan_frame_green_color));
+        paint.setAntiAlias(true);
+        paint.setTextSize(getResources().getDimensionPixelSize(R.dimen.scanner_view_tip_size));
+        canvas.drawText("我的二维码", getWidth() / 2, h + 100, paint);
     }
 
     /**

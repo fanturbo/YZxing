@@ -1,11 +1,14 @@
 package com.example.qrcode;
 
 import android.Manifest;
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.media.Image;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -22,6 +25,9 @@ import android.view.MenuItem;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.example.qrcode.camera.CameraManager;
 import com.example.qrcode.decode.InactivityTimer;
@@ -53,7 +59,7 @@ public class ScannerActivity extends AppCompatActivity implements SurfaceHolder.
     public final int REQUEST_CODE_GET_PIC_URI = 0X12;
     private final int MESSAGE_DECODE_FROM_BITMAP = 0;
 
-    private Toolbar mToolBar;
+    private TextView mToolBar;
     private ScannerView mScannerView;
     private SurfaceView mSurfaceView;
 
@@ -98,6 +104,19 @@ public class ScannerActivity extends AppCompatActivity implements SurfaceHolder.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_activity_scanner);
         initView();
+        if (Build.VERSION.SDK_INT >= 21) {
+            View decorView = getWindow().getDecorView();
+            int option = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
+            decorView.setSystemUiVisibility(option);
+            getWindow().setNavigationBarColor(Color.TRANSPARENT);
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }
+        // 隐藏状态栏
+//        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         hasSurface = false;
         Intent intent = getIntent();
         if (intent != null) {
@@ -111,12 +130,10 @@ public class ScannerActivity extends AppCompatActivity implements SurfaceHolder.
                 if (formats != null) {
                     decodeFormats = formats.get(BARCODE_FORMAT);
                 } else {
-                    decodeFormats = EnumSet.of(BarcodeFormat.QR_CODE
-                            , BarcodeFormat.CODE_128);
+                    decodeFormats = EnumSet.of(BarcodeFormat.QR_CODE, BarcodeFormat.CODE_128);
                 }
             } else {
-                decodeFormats = EnumSet.of(BarcodeFormat.QR_CODE
-                        , BarcodeFormat.CODE_128);
+                decodeFormats = EnumSet.of(BarcodeFormat.QR_CODE, BarcodeFormat.CODE_128);
             }
 
         }
@@ -192,13 +209,11 @@ public class ScannerActivity extends AppCompatActivity implements SurfaceHolder.
         int itemId = item.getItemId();
         if (itemId == R.id.scan_from_picture) {
             //先申请权限
-            int checked = ContextCompat.checkSelfPermission(ScannerActivity.this
-                    , Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            int checked = ContextCompat.checkSelfPermission(ScannerActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
             if (checked == PackageManager.PERMISSION_GRANTED) {
                 goPicture();
             } else {
-                ActivityCompat.requestPermissions(ScannerActivity.this
-                        , new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
+                ActivityCompat.requestPermissions(ScannerActivity.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE_WRITE_EXTERNAL_STORAGE);
             }
         } else if (itemId == R.id.encode_barcode) {
             startActivity(new Intent(ScannerActivity.this, BarcodeActivity.class));
@@ -213,18 +228,12 @@ public class ScannerActivity extends AppCompatActivity implements SurfaceHolder.
     }
 
     private void initView() {
-        mToolBar = (Toolbar) findViewById(R.id.tool_bar);
-        mToolBar.setTitle("二维码/条形码");
-        mToolBar.setTitleTextColor(Color.WHITE);
-        setSupportActionBar(mToolBar);
-        mToolBar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        mToolBar = (TextView) findViewById(R.id.tool_bar);
+        mToolBar.setText("二维码/条码");
         mSurfaceView = (SurfaceView) findViewById(R.id.surface);
         mScannerView = (ScannerView) findViewById(R.id.scan_view);
+        ImageView imageView = (ImageView) findViewById(R.id.iv);
+        ObjectAnimator.ofFloat(imageView, "rotation", 180).start();
     }
 
 
@@ -272,17 +281,17 @@ public class ScannerActivity extends AppCompatActivity implements SurfaceHolder.
     public void handDecode(final Result result) {
         mInactivityTimer.onActivity();
         beepManager.playBeepSoundAndVibrate();
-//        AlertDialog.Builder mScannerDialogBuilder = new AlertDialog.Builder(this);
-//        mScannerDialogBuilder.setMessage("codeType:" + result.getBarcodeFormat() + "-----content:" + result.getText());
-//        mScannerDialogBuilder.setCancelable(false);
-//        mScannerDialogBuilder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
-//            @Override
-//            public void onClick(DialogInterface dialog, int which) {
-//                dialog.dismiss();
-//                ScannerActivity.this.finish();
-//            }
-//        });
-//        mScannerDialogBuilder.create().show();
+        //        AlertDialog.Builder mScannerDialogBuilder = new AlertDialog.Builder(this);
+        //        mScannerDialogBuilder.setMessage("codeType:" + result.getBarcodeFormat() + "-----content:" + result.getText());
+        //        mScannerDialogBuilder.setCancelable(false);
+        //        mScannerDialogBuilder.setPositiveButton("确定", new DialogInterface.OnClickListener() {
+        //            @Override
+        //            public void onClick(DialogInterface dialog, int which) {
+        //                dialog.dismiss();
+        //                ScannerActivity.this.finish();
+        //            }
+        //        });
+        //        mScannerDialogBuilder.create().show();
         Intent data = new Intent();
         BarcodeFormat format = result.getBarcodeFormat();
         String type = format.toString();
@@ -328,6 +337,5 @@ public class ScannerActivity extends AppCompatActivity implements SurfaceHolder.
             }
         }
     }
-
 
 }
